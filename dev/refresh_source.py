@@ -434,7 +434,15 @@ d=$(dirname "$0")
 cd "$d"
 LOG_DIR=${{LOG_DIR:-../logs}}
 
-bash -c "(./start.sh >> '$LOG_DIR/{name}.log') 2>&1\
+if [[ node_modules -ot .git ]]; then
+   # Update npm, otherwise assume nothing changed and we're good.
+   npm install >& "$LOG_DIR/deck.log"
+ else
+   echo "deck npm node_modules looks up to date already."
+ fi
+ 
+ # Append to the log file we just started.
+ bash -c "(npm run start-dev-server >> '$LOG_DIR/{name}.log') 2>&1\
  | tee -a '$LOG_DIR/{name}.log' >& '$LOG_DIR/{name}.err' &"
 """.format(name=name))
       os.chmod(path, 0777)
